@@ -51,27 +51,45 @@ export const Masker = () => {
       const newDisabledIndexes = masks
         .map((e, index) => (Math.random() < maskingRatio ? index : -1))
         .filter((e) => e !== -1);
-      console.log(newDisabledIndexes.length);
       if (newDisabledIndexes.length === masks.length) continue;
       setDisabledIndexes(newDisabledIndexes);
       break;
     }
   }, [masks, maskingRatio]);
 
+  const getRelativePoint = (p: Point) => {
+    if (!boundary) throw "boundary is not defined";
+    return {
+      x: (p.x - boundary.x) / boundary.width,
+      y: (p.y - boundary.y) / boundary.height,
+    };
+  };
+
   const startClick = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
-    if (startPoint) return;
+    console.log("아니이건브라우저오류아니야?");
+    if (startPoint) {
+      setStartPoint(undefined);
+      setEndPoint(undefined);
+      return;
+    }
     try {
       const { x, y } = getPoint(e);
 
       const selected = masks.find((mask) => {
+        const relativePoint = getRelativePoint({ x, y });
         const startx = mask.x;
         const starty = mask.y;
         const endx = mask.x + mask.width;
         const endy = mask.y + mask.height;
 
-        return x >= startx && x <= endx && y >= starty && y <= endy;
+        return (
+          relativePoint.x >= startx &&
+          relativePoint.x <= endx &&
+          relativePoint.y >= starty &&
+          relativePoint.y <= endy
+        );
       });
 
       if (selected) {
@@ -94,24 +112,33 @@ export const Masker = () => {
         setEndPoint({ x, y });
       } catch (e) {}
     },
-    [startPoint]
+    [startPoint, boundary]
   );
 
   const endClick = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
-    if (!startPoint) return;
-    if (!endPoint) return;
+    if (!startPoint || !endPoint) {
+      setStartPoint(undefined);
+      setEndPoint(undefined);
+      return;
+    }
+    if (!boundary) return;
+
+    const relativeStartPoint = getRelativePoint(startPoint);
+    const relativeEndPoint = getRelativePoint(endPoint);
 
     const newMask = {
-      x: Math.min(startPoint.x, endPoint.x),
-      y: Math.min(startPoint.y, endPoint.y),
-      width: Math.abs(startPoint.x - endPoint.x),
-      height: Math.abs(startPoint.y - endPoint.y),
+      x: Math.min(relativeStartPoint.x, relativeEndPoint.x),
+      y: Math.min(relativeStartPoint.y, relativeEndPoint.y),
+      width: Math.abs(relativeStartPoint.x - relativeEndPoint.x),
+      height: Math.abs(relativeStartPoint.y - relativeEndPoint.y),
     };
 
-    if (newMask.width < 10 || newMask.height < 10) {
-    } else setMasks((prev) => [...prev, newMask]);
+    // if (newMask.width < 10 || newMask.height < 10) {
+    // } else {
+    setMasks((prev) => [...prev, newMask]);
+    // }
 
     setEndPoint(undefined);
     setStartPoint(undefined);
@@ -149,18 +176,36 @@ export const Masker = () => {
 
   return (
     <Container filly>
-      <ImageMaskerWrapper
-        onMouseDown={startClick}
-        onMouseMove={onDrag}
-        onMouseUp={endClick}
-        onTouchStart={startClick}
-        onTouchMove={onDrag}
-        onTouchEnd={endClick}
-        onClick={(e) => e.preventDefault()}
-        onDragStart={(e) => e.preventDefault()}
-        draggable={false}
-      >
+      <ImageMaskerWrapper>
         <Image src={imageSrc} onDraw={setBoundary} />
+        {boundary && (
+          <div
+            onMouseDown={startClick}
+            onMouseMove={onDrag}
+            onMouseUp={endClick}
+            onTouchStart={startClick}
+            onTouchMove={onDrag}
+            onTouchEnd={endClick}
+            onDragStart={(e) => e.preventDefault()}
+            draggable={false}
+            style={{
+              position: "absolute",
+              top: boundary.y,
+              left: boundary.x,
+              width: boundary.width,
+              height: boundary.height,
+              // border: "2px solid red",
+            }}
+          >
+            {masks.map((mask, index) => (
+              <Mask
+                boundary={mask}
+                disabled={disabledIndexes.includes(index)}
+                opacity={opacity}
+              />
+            ))}
+          </div>
+        )}
         {startPoint && endPoint && (
           <div
             style={{
@@ -174,13 +219,6 @@ export const Masker = () => {
             }}
           />
         )}
-        {masks.map((mask, index) => (
-          <Mask
-            boundary={mask}
-            disabled={disabledIndexes.includes(index)}
-            opacity={opacity}
-          />
-        ))}
       </ImageMaskerWrapper>
       <ActionBar x="right" gap={1} padding={2}>
         <Button onClick={changeMaskingRatio}>

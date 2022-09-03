@@ -52,7 +52,13 @@ export const ImageFitter: React.FC<{
   }, [props.src, props.onDraw]);
 
   return (
-    <div className={props.className} ref={containerRef}>
+    <div
+      style={{
+        height: "100%",
+      }}
+      className={props.className}
+      ref={containerRef}
+    >
       <img
         src={props.src}
         style={{
