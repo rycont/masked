@@ -93,7 +93,7 @@ export const ImageViewer = () => {
         )}
       </ImageMaskerWrapper>
       <ActionBar x="right" gap={1} padding={2}>
-        <Button type="primary" onClick={() => goto("/")}>
+        <Button type="primary" onClick={() => goto("/new")}>
           나도 이런거 만들기!
         </Button>
         <Button onClick={sharePage} icon={<ShareAltOutlined />}>
