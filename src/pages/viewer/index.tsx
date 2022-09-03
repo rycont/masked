@@ -92,10 +92,15 @@ export const ImageViewer = () => {
     getImageInfo(imageId).then((res) => {
       setImageSrc(import.meta.env.VITE_SUPABASE_STORAGE_URL + res.image_uri);
       setMasks(res.masks);
+      setDisabledIndexes(
+        (res.masks as Boundary[])
+          .map((_, index) => (Math.random() < maskingRatio ? index : -1))
+          .filter((e) => e !== -1)
+      );
       setImageName(res.name);
       setDescription(res.description);
     });
-  }, [imageId]);
+  }, [imageId, maskingRatio]);
 
   useEffect(() => {
     console.log("넘지 말아 BORDER LINE", maskingRatio);
@@ -133,12 +138,19 @@ export const ImageViewer = () => {
             }}
           >
             {masks.map((mask, index) => (
-              <Mask
-                key={JSON.stringify(mask)}
-                boundary={mask}
-                disabled={disabledIndexes.includes(index)}
-                opacity={opacity}
-              />
+              <>
+                <Mask
+                  key={JSON.stringify(mask)}
+                  boundary={mask}
+                  disabled={!disabledIndexes.includes(index)}
+                  opacity={opacity}
+                />
+                {console.log(
+                  disabledIndexes,
+                  disabledIndexes.includes(index),
+                  opacity
+                )}
+              </>
             ))}
           </div>
         )}
@@ -173,7 +185,7 @@ export const ImageViewer = () => {
             </Button>
             <Button onClick={goOtherImage}>다른 이미지 보기</Button>
             <Button onClick={changeMaskingRatio}>
-              {maskingRatio * 100}% 보이기
+              {maskingRatio * 100}% 숨기기
             </Button>
             <Button onClick={changeOpacity}>불투명도 {opacity * 100}%</Button>
             <Button onClick={hideRandom}>👻섞기</Button>

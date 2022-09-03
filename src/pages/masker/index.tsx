@@ -343,7 +343,7 @@ export const Masker = () => {
       </ImageMaskerWrapper>
       <ActionBar x="right" gap={1} padding={2}>
         <Button onClick={changeMaskingRatio}>
-          {maskingRatio * 100}% 보이기
+          {maskingRatio * 100}% 숨기기
         </Button>
         <Button onClick={changeOpacity}>불투명도 {opacity * 100}%</Button>
         <Button onClick={removeAll}>모두 지우기</Button>
