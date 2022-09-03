@@ -4,6 +4,10 @@ import { Boundary } from "../contatnts/types";
 const MaskRect = styled("div", {
   position: "absolute",
   border: "2px solid black",
+  "&:hover": {
+    opacity: 0.3,
+  },
+  transition: "0.3s",
 });
 
 export const Mask: React.FC<{

@@ -174,7 +174,7 @@ export const Masker = () => {
   }, []);
 
   const changeMaskingRatio = useCallback(() => {
-    setMaskingRatio((prev) => Math.floor(((prev + 0.2) % 1) * 100) / 100);
+    setMaskingRatio((prev) => Math.round(((prev + 0.2) % 1) * 100) / 100);
     hideRandom();
   }, [hideRandom]);
 
@@ -249,6 +249,7 @@ export const Masker = () => {
           >
             {masks.map((mask, index) => (
               <Mask
+                key={JSON.stringify(mask)}
                 boundary={mask}
                 disabled={disabledIndexes.includes(index)}
                 opacity={opacity}
@@ -272,9 +273,9 @@ export const Masker = () => {
       </ImageMaskerWrapper>
       <ActionBar x="right" gap={1} padding={2}>
         <Button onClick={changeMaskingRatio}>
-          {maskingRatio * 100}% 가리기
+          {maskingRatio * 100}% 보이기
         </Button>
-        <Button onClick={changeOpacity}>투명도 {opacity}</Button>
+        <Button onClick={changeOpacity}>불투명도 {opacity * 100}%</Button>
         <Button onClick={removeAll}>모두 지우기</Button>
         <Button onClick={saveMasks} icon={<SaveOutlined />}>
           저장
