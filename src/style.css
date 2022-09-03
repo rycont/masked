@@ -1,0 +1,17 @@
+@import "antd/dist/antd.css";
+
+:root {
+  font-size: 6px;
+}
+
+body {
+  margin: 0px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
