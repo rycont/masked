@@ -17,16 +17,17 @@ export const ImageFitter: React.FC<{
       height: containerRef.current.clientHeight,
     };
 
-    const imageSize = {
-      width: imageRef.current.clientWidth,
-      height: imageRef.current.clientHeight,
-    };
-
     const containerAspect = containerSize.width / containerSize.height;
     const imageAspect =
       imageRef.current.naturalWidth / imageRef.current.naturalHeight;
 
     if (containerAspect > imageAspect) {
+      console.log({
+        y: 0,
+        x: (containerSize.width - containerSize.height * imageAspect) / 2,
+        width: containerSize.height * imageAspect,
+        height: containerSize.height,
+      });
       props.onDraw?.({
         y: 0,
         x: (containerSize.width - containerSize.height * imageAspect) / 2,
@@ -35,6 +36,13 @@ export const ImageFitter: React.FC<{
       });
     } else {
       // 가로에 맞춤
+      console.log(containerSize.height, containerSize.width, imageAspect);
+      console.log({
+        x: 0,
+        y: (containerSize.height - containerSize.width / imageAspect) / 2,
+        width: containerSize.width,
+        height: containerSize.width / imageAspect,
+      });
       props.onDraw?.({
         x: 0,
         y: (containerSize.height - containerSize.width / imageAspect) / 2,
@@ -45,7 +53,8 @@ export const ImageFitter: React.FC<{
   };
 
   useEffect(() => {
-    onResize();
+    // console.log("Oh");
+    // onResize();
     window.addEventListener("resize", onResize);
 
     return () => window.removeEventListener("resize", onResize);
@@ -66,6 +75,7 @@ export const ImageFitter: React.FC<{
           height: "100%",
           objectFit: "contain",
         }}
+        onLoad={onResize}
         ref={imageRef}
       />
     </div>

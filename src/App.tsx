@@ -5,7 +5,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Masker />} />
+        <Route path="/new" element={<Masker />} />
       </Routes>
     </BrowserRouter>
   );

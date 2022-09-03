@@ -1,10 +1,13 @@
-// import { ImageFitter } from "../../components";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActionBar, Mask } from "../../components";
-import { Button } from "antd";
+import { Button, notification } from "antd";
 import { Boundary, Point } from "../../contatnts/types";
 import { ImageMaskerWrapper, Image, Container } from "./styles";
 import { SaveOutlined } from "@ant-design/icons";
+import "../../api/createImage";
+import { useDropzone } from "react-dropzone";
+import { createImage } from "../../api/createImage";
+import { useNavigate } from "react-router-dom";
 
 const isMouseEvent = (
   event: React.TouchEvent | React.MouseEvent
@@ -41,10 +44,26 @@ export const Masker = () => {
   const [endPoint, setEndPoint] = useState<Point>();
 
   const [opacity, setOpacity] = useState<number>(0.2);
+  const [imageSrc, setImageSrc] = useState<string>();
   const [maskingRatio, setMaskingRatio] = useState(0.5);
-  const [imageSrc, setImageSrc] = useState<string>(
-    "https://www.dimigo.hs.kr/layouts/minimal_dimigo/images/background.jpg"
-  );
+  const [isFirstDraw, setIsFirstDraw] = useState(true);
+
+  const goto = useNavigate();
+  const { acceptedFiles, getRootProps, getInputProps } = useDropzone();
+
+  useEffect(() => {
+    setMasks([]);
+  }, [imageSrc]);
+
+  useEffect(() => {
+    if (acceptedFiles.length) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageSrc(reader.result as string);
+      };
+      reader.readAsDataURL(acceptedFiles[0]);
+    }
+  }, [acceptedFiles]);
 
   const hideRandom = useCallback(() => {
     while (true) {
@@ -68,7 +87,6 @@ export const Masker = () => {
   const startClick = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
-    console.log("아니이건브라우저오류아니야?");
     if (startPoint) {
       setStartPoint(undefined);
       setEndPoint(undefined);
@@ -123,6 +141,7 @@ export const Masker = () => {
       setEndPoint(undefined);
       return;
     }
+
     if (!boundary) return;
 
     const relativeStartPoint = getRelativePoint(startPoint);
@@ -142,6 +161,12 @@ export const Masker = () => {
 
     setEndPoint(undefined);
     setStartPoint(undefined);
+    if (isFirstDraw) {
+      setIsFirstDraw(false);
+      notification.info({
+        message: "가린 영역을 클릭하면 삭제할 수 있습니다",
+      });
+    }
   };
 
   const changeOpacity = useCallback(() => {
@@ -156,6 +181,23 @@ export const Masker = () => {
   const removeAll = () => {
     setMasks([]);
     setDisabledIndexes([]);
+  };
+
+  const saveMasks = async () => {
+    if (!imageSrc) {
+      notification.error({
+        message: "이미지를 먼저 업로드해주세요",
+        duration: 1,
+      });
+      return;
+    }
+    const image = await (await fetch(imageSrc)).blob();
+    const createId = await createImage(masks, image, "test");
+    notification.success({
+      message: "저장이 완료됐습니다 :) 링크를 다른 사람과 공유해보세요!",
+      duration: 1,
+    });
+    goto(`/image/${createId}`);
   };
 
   useEffect(() => {
@@ -177,7 +219,16 @@ export const Masker = () => {
   return (
     <Container filly>
       <ImageMaskerWrapper>
-        <Image src={imageSrc} onDraw={setBoundary} />
+        {imageSrc ? (
+          <Image src={imageSrc} onDraw={setBoundary} />
+        ) : (
+          <div {...getRootProps({ className: "dropzone" })}>
+            <input {...getInputProps()} />
+            <p>여기를 클릭해서 파일을 열거나, 파일을 여기로 드래그해주세요</p>
+            <p>혹은 사진을 복사하고 Ctrl-V를 눌러보세요!</p>
+          </div>
+        )}
+        {/* {console.log(boundary)} */}
         {boundary && (
           <div
             onMouseDown={startClick}
@@ -194,7 +245,6 @@ export const Masker = () => {
               left: boundary.x,
               width: boundary.width,
               height: boundary.height,
-              // border: "2px solid red",
             }}
           >
             {masks.map((mask, index) => (
@@ -226,7 +276,9 @@ export const Masker = () => {
         </Button>
         <Button onClick={changeOpacity}>투명도 {opacity}</Button>
         <Button onClick={removeAll}>모두 지우기</Button>
-        <Button icon={<SaveOutlined />}>(작동 안함) 저장</Button>
+        <Button onClick={saveMasks} icon={<SaveOutlined />}>
+          저장
+        </Button>
         <Button onClick={hideRandom}>👻섞기</Button>
       </ActionBar>
     </Container>
