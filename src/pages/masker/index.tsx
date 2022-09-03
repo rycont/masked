@@ -1,6 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ActionBar, Mask } from "../../components";
-import { Button, notification } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  notification,
+  Space,
+  Typography,
+} from "antd";
 import { Boundary, Point } from "../../contatnts/types";
 import { ImageMaskerWrapper, Image, Container } from "./styles";
 import { SaveOutlined } from "@ant-design/icons";
@@ -8,6 +16,7 @@ import "../../api/createImage";
 import { useDropzone } from "react-dropzone";
 import { createImage } from "../../api/createImage";
 import { useNavigate } from "react-router-dom";
+import { Vexile } from "@haechi/flexile";
 
 const isMouseEvent = (
   event: React.TouchEvent | React.MouseEvent
@@ -164,7 +173,7 @@ export const Masker = () => {
     if (isFirstDraw) {
       setIsFirstDraw(false);
       notification.info({
-        message: "가린 영역을 클릭하면 삭제할 수 있습니다",
+        message: "영역을 클릭하면 삭제할 수 있습니다",
       });
     }
   };
@@ -183,6 +192,8 @@ export const Masker = () => {
     setDisabledIndexes([]);
   };
 
+  const [form] = Form.useForm();
+
   const saveMasks = async () => {
     if (!imageSrc) {
       notification.error({
@@ -191,12 +202,71 @@ export const Masker = () => {
       });
       return;
     }
+
+    let title = "";
+    let description = "";
+
+    await new Promise<void>((ok, error) => {
+      const modal = Modal.info({
+        icon: <></>,
+        closable: true,
+        okButtonProps: {
+          onClick() {
+            if (title) {
+              modal.destroy();
+              ok();
+            } else notification.error({ message: "이름을 입력해주세요" });
+          },
+        },
+        title: (
+          <>
+            <Typography.Title level={5}>
+              이미지의 정보를 알려주세요
+            </Typography.Title>
+          </>
+        ),
+        content: (
+          <Form layout="vertical" form={form}>
+            <Form.Item
+              label="이름"
+              name="title"
+              required
+              rules={[
+                {
+                  required: true,
+                  message: "이름을 입력해주세요",
+                },
+              ]}
+            >
+              <Input
+                placeholder="[공업일반] 산업재해의 요건"
+                required
+                onChange={(e) => {
+                  title = e.target.value;
+                }}
+              />
+            </Form.Item>
+            <Form.Item label="설명">
+              <Input
+                placeholder="출처: 공업일반 수능특강 175p 2째 문단"
+                onChange={(e) => {
+                  description = e.target.value;
+                }}
+              />
+            </Form.Item>
+          </Form>
+        ),
+      });
+    });
+
     const image = await (await fetch(imageSrc)).blob();
-    const createId = await createImage(masks, image, "test");
+    const createId = await createImage(masks, image, title, description);
+
     notification.success({
       message: "저장이 완료됐습니다 :) 링크를 다른 사람과 공유해보세요!",
       duration: 1,
     });
+
     goto(`/image/${createId}`);
   };
 

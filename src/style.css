@@ -8,7 +8,10 @@ body {
   margin: 0px;
   /* width: 100vw;
   height: 100vh; */
+  font-family: "SUIT", "Pretendard", "Spoqa Han Sans Neo", "Spoqa Han Sans",
+    "Noto Sans CJK KR", "Noto Sans KR";
   overflow-x: hidden;
+  line-height: revert;
 }
 
 #root {
@@ -25,4 +28,51 @@ body {
   align-items: center;
   gap: 2rem;
   border: 2px dashed #eeeeee;
+}
+
+.ant-form-item {
+  margin-bottom: 12px;
+}
+
+.ant-modal-confirm .ant-modal-body {
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.ant-modal-content {
+  border-radius: 12px;
+}
+
+.ant-form-item-label {
+  padding-bottom: 4px !important;
+  font-weight: 500;
+}
+
+.ant-btn,
+.ant-input {
+  border-radius: 6px;
+  line-height: revert;
+}
+
+.ant-input {
+  padding: 10px 12px;
+}
+
+.ant-card-cover {
+  margin: 0px;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-card-meta-title {
+  margin-bottom: 0px !important;
+}
+
+.ant-card-body {
+  padding: 16px;
+}
+
+.ant-card {
+  border-radius: 12px;
 }
