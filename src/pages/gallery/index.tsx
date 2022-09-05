@@ -19,7 +19,7 @@ const Gallery: React.FC<{
       }}
     >
       {images.map((image) => (
-        <Link to={"/image/" + image.id}>
+        <Link to={"/image/" + image.id} key={image.id}>
           <Card
             key={image.id}
             cover={
