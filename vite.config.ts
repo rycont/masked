@@ -10,19 +10,24 @@ export default defineConfig({
       short_name: 'Masked',
       theme_color: '#8E028E',
       icons: [{
-        src: '/ghost.png',
+        src: '/icon.png',
         sizes: '512x512',
         purpose: "maskable"
       }, {
-        src: '/ghost.png',
+        src: '/icon.png',
         sizes: '512x512',
       }],
       share_target: {
         action: '/new',
-        method: 'GET',
+        method: 'POST',
         params: {
           name: 'name',
-          text: 'description'
+          text: 'description',
+          url: 'url',
+          files: [{
+            name: 'image',
+            accept: ['image/*']
+          }]
         }
       }
     }
